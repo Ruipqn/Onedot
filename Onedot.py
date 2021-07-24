@@ -15,40 +15,59 @@ from geopy.geocoders import Nominatim
 import numpy as np
 
 
+# In[2]:
+
+
+target = pd.read_excel('Target Data.xlsx')
+target.head()
+
+
+# In[3]:
+
+
+target.shape
+
+
+# In[ ]:
+
+
+
+
+
 # ### Data Profiling
 
-# In[2]:
+# In[4]:
 
 
 data = pd.read_json('supplier_car.json', lines=True, encoding='utf-8')
 data.head()
 
 
-# In[3]:
+# In[5]:
 
 
 data['Attribute Names'].unique()
 
 
-# In[4]:
+# In[6]:
 
 
 data['Attribute Values'].unique()
 
 
-# In[5]:
+# In[7]:
 
 
 data.shape
 
 
-# In[6]:
+# In[8]:
 
 
 data.dtypes
 
 
-# In[7]:
+# In[9]:
 
 
 cat_vars = data.select_dtypes(include='object')
@@ -70,13 +89,13 @@ data.dtypes
 
 # #### Missing values
 
-# In[8]:
+# In[10]:
 
 
 data.isna().sum()
 
 
-# In[9]:
+# In[11]:
 
 
 data.isna().sum().reset_index(name="n").plot.bar(x='index', y='n', rot=45)
@@ -87,21 +106,21 @@ data.isna().sum().reset_index(name="n").plot.bar(x='index', y='n', rot=45)
 
 # #### Numeric variables
 
-# In[10]:
+# In[12]:
 
 
 register_matplotlib_converters()
 data.describe()
 
 
-# In[11]:
+# In[13]:
 
 
 data.boxplot(rot=45)
 plt.show()
 
 
-# In[12]:
+# In[14]:
 
 
 #pp.ProfileReport(data)
@@ -109,7 +128,7 @@ plt.show()
 
 # ### Pre processing
 
-# In[13]:
+# In[15]:
 
 
 target_cols_aux = data['Attribute Names'].unique()
@@ -120,33 +139,33 @@ for x in target_cols_aux:
 target_cols
 
 
-# In[14]:
+# In[16]:
 
 
 target_df = pd.DataFrame(columns = target_cols)
 target_df
 
 
-# In[15]:
+# In[17]:
 
 
 target_df = data.reset_index().groupby(['ID','Attribute Names'])['Attribute Values'].aggregate('first').unstack()
 
 target_df = pd.DataFrame(target_df.to_records())
-print(target_df.shape)
+#print(target_df.shape)
 target_df.head()
 
 
-# In[16]:
+# In[18]:
 
 
 aux_df = data[['ID','MakeText','TypeName','TypeNameFull','ModelText','ModelTypeText']]
 aux_df = aux_df.drop_duplicates()
-print(aux_df.shape)
-aux_df.head()
+#print(aux_df.shape)
+#aux_df.head()
 
 
-# In[17]:
+# In[19]:
 
 
 target_df = pd.merge(aux_df,target_df)
@@ -155,7 +174,7 @@ target_df.sort_values(by=['ID'], ascending=[True],inplace = True)
 target_df.columns
 
 
-# In[18]:
+# In[20]:
 
 
 geolocator = Nominatim(user_agent = "geoapiExercises")
@@ -177,10 +196,10 @@ for city in cities:
     dict_countries[city] = [code,country]
 
 
-print(dict_countries)
+#print(dict_countries)
 
 
-# In[19]:
+# In[21]:
 
 
 #reorder and rename columns
@@ -214,7 +233,7 @@ target_df.head()
 
 
 
-# In[20]:
+# In[22]:
 
 
 target_df1 = target_df.copy()
@@ -222,7 +241,7 @@ target_df1 = target_df.copy()
 
 # #### Normalization
 
-# In[21]:
+# In[23]:
 
 
 #In this stage it is necessary to, at least, alter condition and color to english and the comsumption fuel to only present the units
@@ -238,7 +257,7 @@ target_df['condition'] = target_df['condition'].map(lambda x: x.lower())
 target_df['condition'] = target_df['condition'].replace({'neu': 'new', 'oldtimer': 'used','vorführmodell':'demonstration model'})
 
 
-# In[22]:
+# In[24]:
 
 
 
@@ -271,26 +290,26 @@ target_df['color'] = target_df['color'].map(lambda x: x.lower())
 target_df['color'] = target_df['color'].replace(dict_colors)
 
 
-# In[23]:
+# In[25]:
 
 
 
 target_df['fuel_consumption_unit'] = target_df['fuel_consumption_unit'].map(lambda x: ''.join([i for i in x if not i.isdigit()]))
 target_df['fuel_consumption_unit'] = target_df['fuel_consumption_unit'].map(lambda x: x.replace('.','').replace(' ','').replace('/','_'))
 target_df['fuel_consumption_unit'] = target_df['fuel_consumption_unit'].map(lambda x: x + '_consumption' if 'null' not in x else x)
-target_df['fuel_consumption_unit'].unique()
+#target_df['fuel_consumption_unit'].unique()
 
 
-# In[24]:
+# In[26]:
 
 
 target_df2 = target_df.copy()
-target_df.columns
+#target_df.columns
 
 
 # ### Data Integration
 
-# In[25]:
+# In[27]:
 
 
 target_df3 = target_df.reset_index(drop=True)
@@ -301,7 +320,7 @@ target_df3 = target_df3.drop(columns=['TypeNameFull',
 target_df3.head()
 
 
-# In[26]:
+# In[28]:
 
 
 
